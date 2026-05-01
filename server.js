@@ -14,46 +14,40 @@ app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-3.1-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `You are a pet care assistant. Answer ONLY pet-related questions (dogs, cats, animals, feeding, health, training). 
-                  If the question is not about pets, reply: "I can only help with pet care questions."
-                  
-                  User: ${userMessage}`
-                }
-              ]
-            }
-          ]
-        })
-      }
-    );
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini", // fast + cheap + perfect for chatbot
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful pet care assistant. Only answer pet-related questions."
+          },
+          {
+            role: "user",
+            content: userMessage
+          }
+        ]
+      })
+    });
 
     const data = await response.json();
 
-    if (data.error) {
-      console.error("Gemini API Error:", data.error.message);
-      return res.status(500).json({ reply: "The pet assistant is currently resting. Please try again in a moment." });
-    }
+    console.log("OpenAI response:", data);
 
     const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "I'm sorry, I couldn't process that request.";
+      data?.choices?.[0]?.message?.content ||
+      "Sorry, I couldn't understand.";
 
     res.json({ reply });
 
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    res.status(500).json({ reply: "Server error. Please check your connection." });
+    console.error("Server error:", error);
+    res.json({ reply: "Error connecting to AI service." });
   }
 });
 
