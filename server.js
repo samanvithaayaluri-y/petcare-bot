@@ -39,6 +39,7 @@ User: ${userMessage}`
     );
 
     const data = await response.json();
+    console.log("FULL RESPONSE:", data);
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
