@@ -15,21 +15,22 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "x-goog-api-key": process.env.GEMINI_API_KEY
         },
         body: JSON.stringify({
           contents: [
             {
+              role: "user",
               parts: [
                 {
-                  text: `You are a pet care assistant. Answer ONLY pet-related questions (dogs, cats, animals, feeding, health, training). 
-If the question is not about pets, reply: "I can only help with pet care questions."
+                  text: `You are a pet care assistant. Answer ONLY pet-related questions.
 
-User: ${userMessage}`
+${userMessage}`
                 }
               ]
             }
@@ -42,15 +43,19 @@ User: ${userMessage}`
 
     console.log("Gemini response:", data);
 
+    if (data.error) {
+      return res.json({ reply: "API Error: " + data.error.message });
+    }
+
     const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Sorry, I couldn't understand.";
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response from AI.";
 
     res.json({ reply });
 
   } catch (error) {
     console.error("Server error:", error);
-    res.json({ reply: "Error connecting to AI service." });
+    res.json({ reply: "Server error." });
   }
 });
 
