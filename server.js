@@ -21,7 +21,7 @@ app.post("/chat", async (req, res) => {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // fast + cheap + perfect for chatbot
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -37,17 +37,25 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    console.log("OpenAI response:", data);
+    console.log("FULL RESPONSE:", JSON.stringify(data, null, 2));
 
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      "Sorry, I couldn't understand.";
+    // ✅ Handle API errors properly
+    if (data.error) {
+      return res.json({ reply: "API Error: " + data.error.message });
+    }
+
+    // ✅ Ensure response exists
+    if (!data.choices || data.choices.length === 0) {
+      return res.json({ reply: "No response from AI." });
+    }
+
+    const reply = data.choices[0].message.content;
 
     res.json({ reply });
 
   } catch (error) {
-    console.error("Server error:", error);
-    res.json({ reply: "Error connecting to AI service." });
+    console.error("SERVER ERROR:", error);
+    res.json({ reply: "Server error." });
   }
 });
 
