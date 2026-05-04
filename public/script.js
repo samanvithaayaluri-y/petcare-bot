@@ -1,14 +1,13 @@
 function sendMessage() {
   const input = document.getElementById("user-input");
-  const text = input.value.trim().toLowerCase();
-
+  const text = input.value.trim();
   if (!text) return;
 
   addMessage("user", text);
   input.value = "";
 
-  const reply = getBotResponse(text);
-  addMessage("bot", reply);
+  const reply = getBotResponse(text.toLowerCase());
+  setTimeout(() => addMessage("bot", reply), 300); // small delay = natural feel
 }
 
 function addMessage(sender, text) {
@@ -22,31 +21,67 @@ function addMessage(sender, text) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function getBotResponse(message) {
+// 🔍 Utility: keyword matcher
+function hasAny(msg, keywords) {
+  return keywords.some(k => msg.includes(k));
+}
 
-  if (message.includes("hi") || message.includes("hello")) {
-    return "Hello! 🐾 I’m your pet care assistant. Ask me anything about pets!";
+// 🎯 Main logic
+function getBotResponse(msg) {
+
+  // 👋 greetings
+  if (hasAny(msg, ["hi", "hello", "hey"])) {
+    return "Hey there! 🐾 I'm your Bhairav Pet Care Assistant. Ask me about feeding, health, training, or grooming!";
   }
 
-  if (message.includes("feed") || message.includes("food")) {
-    return "For puppies, feed high-quality dog food 3–4 times a day. Ensure fresh water is always available.";
+  // 🐶 puppy age detection
+  if (hasAny(msg, ["month", "months", "year"])) {
+    if (hasAny(msg, ["3", "three"])) {
+      return "At 3 months, puppies should eat 3–4 small meals a day with high-quality puppy food 🐶.";
+    }
+    if (hasAny(msg, ["6", "six"])) {
+      return "At 6 months, feed your puppy 2–3 times daily with balanced nutrition.";
+    }
+    if (hasAny(msg, ["8", "nine", "9"])) {
+      return "At 8–9 months, your dog can move toward 2 meals a day with proper protein and nutrients.";
+    }
   }
 
-  if (message.includes("cat") && message.includes("not eating")) {
-    return "If your cat is not eating, it could be stress or illness. Monitor for 24 hours and consult a vet if it continues.";
+  // 🍖 feeding
+  if (hasAny(msg, ["feed", "food", "eat", "diet"])) {
+    return "Feed your pet high-quality food suited to their age. Puppies need more frequent meals, while adult dogs eat 2 times a day. Always provide fresh water 💧.";
   }
 
-  if (message.includes("dog") && message.includes("sick")) {
-    return "If your dog is sick, look for symptoms like vomiting or lethargy and consult a veterinarian immediately.";
+  // 🏥 health / sick
+  if (hasAny(msg, ["sick", "vomit", "not eating", "ill", "weak"])) {
+    return "If your pet is sick, monitor symptoms like vomiting, lethargy, or loss of appetite. If it continues, consult a vet immediately 🏥.";
   }
 
-  if (message.includes("vaccination")) {
-    return "Puppies need vaccinations at 6, 9, and 12 weeks. Consult your vet for a proper schedule.";
+  // 💉 vaccination
+  if (hasAny(msg, ["vaccine", "vaccination"])) {
+    return "Vaccinations are crucial! Puppies need shots at 6, 9, and 12 weeks. Ask your vet for a proper schedule 💉.";
   }
 
-  if (message.includes("train") || message.includes("training")) {
-    return "Start training early using positive reinforcement like treats and praise.";
+  // 🧼 grooming
+  if (hasAny(msg, ["groom", "bath", "clean"])) {
+    return "Bathe your pet once every 3–4 weeks and brush regularly to keep their coat healthy ✨.";
   }
 
-  return "I can help with pet care like feeding, training, and health. Try asking something like 'What should I feed my puppy?' 🐶";
-} 
+  // 🎓 training
+  if (hasAny(msg, ["train", "training", "obedience"])) {
+    return "Use positive reinforcement like treats and praise while training. Start early and be consistent 🎓.";
+  }
+
+  // 🐱 cat specific
+  if (hasAny(msg, ["cat"])) {
+    return "Cats need a balanced diet, clean litter box, and regular vet checkups. If your cat stops eating, consult a vet 🐱.";
+  }
+
+  // 🚨 emergency
+  if (hasAny(msg, ["emergency", "bleeding", "injury"])) {
+    return "In emergencies, keep your pet calm and go to the nearest vet immediately 🚑.";
+  }
+
+  // ❓ fallback (smart suggestions)
+  return "I can help with:\n🐶 Feeding\n🏥 Health\n💉 Vaccination\n🎓 Training\n🧼 Grooming\n\nTry asking: 'What should I feed my puppy?'";
+}
