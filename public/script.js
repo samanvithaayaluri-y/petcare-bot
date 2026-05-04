@@ -31,7 +31,7 @@ function getBotResponse(msg) {
 
   // 👋 greetings
   if (hasAny(msg, ["hi", "hello", "hey"])) {
-    return "Hey there! 🐾 I'm your Bhairav Pet Care Assistant. Ask me about feeding, health, training, or grooming!";
+    return "Hey there! 🐾 I'm Bhairav, your Pet Care Assistant. Ask me about feeding, health, training, or grooming!";
   }
 
   // 🐶 puppy age detection
